@@ -2,12 +2,16 @@ module DiasporaClient
   class ResourceServer < ActiveRecord::Base
     attr_accessible :host, :client_id, :client_secret
 
-    def self.register(host, self_url = nil)
-      self_url = self_url ? "#{self_url.host}:#{self_url.port}" : cubbi.es
+    def self.register(host, self_url)
+      self_url = "#{self_url.host}:#{self_url.port}" if self_url.respond_to?(:host)
       pod = self.new(:host => host)
 
-      connection = Faraday::Connection.new do |builder|
-        builder.use Faraday::Adapter::EMSynchrony
+      if defined?(EM::Synchrony)
+        connection = Faraday::Connection.new do |builder|
+            builder.use Faraday::Adapter::EMSynchrony
+        end
+      else
+        connection = Faraday.default_connection
       end
 
       response = connection.post("http://#{host}/oauth/token",

@@ -41,7 +41,7 @@ Gem::Specification.new do |s|
       s.add_runtime_dependency(%q<activerecord>, [">= 0"])
       s.add_runtime_dependency(%q<oauth2>, [">= 0"])
       s.add_runtime_dependency(%q<faraday>, [">= 0"])
-      s.add_runtime_dependency(%q<em-synchrony>, [">= 0"])
+      s.add_runtime_dependency(%q<em-synchrony>, [">= 0"]) if RUBY_VERSION.include?("1.9")
       s.add_development_dependency(%q<shoulda>, [">= 0"])
       s.add_development_dependency(%q<bundler>, ["~> 1.0.0"])
       s.add_development_dependency(%q<jeweler>, ["~> 1.6.2"])

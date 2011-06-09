@@ -15,11 +15,23 @@ module DiasporaClient
       params['diaspora_handle']
     end
 
+    def redirect_path
+      '/auth/diaspora/callback'
+    end
+
+    def after_oauth_redirect_path
+      '/users/edit'
+    end
+
     def redirect_uri
       uri = URI.parse(request.url)
-      uri.path = '/auth/diaspora/callback'
-      uri.query = {:diaspora_handle => diaspora_handle }.to_query
+      uri.path = redirect_path
+      uri.query = "diaspora_handle=#{diaspora_handle}"
       uri.to_s
+    end
+
+    def current_user
+      request.env["warden"].user
     end
 
     get '/' do
@@ -34,7 +46,7 @@ module DiasporaClient
         access_token = client.web_server.get_access_token(params[:code], :redirect_uri => redirect_uri)
         user = JSON.parse(access_token.get('/api/v0/me'))
 
-        request.env["warden"].user.create_access_token(
+        current_user.create_access_token(
           :uid => user["uid"],
           :resource_server_id => pod.id,
           :access_token => access_token.token,
@@ -43,12 +55,12 @@ module DiasporaClient
         )
       end
 
-      redirect "/users/edit"
+      redirect after_oauth_redirect_path
     end
 
     delete '/' do
-      request.env["warden"].user.access_token.destroy
-      redirect "/users/edit"
+      current_user.access_token.destroy
+      redirect after_oauth_redirect_path
     end
 
   end
