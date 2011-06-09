@@ -17,7 +17,7 @@ Jeweler::Tasks.new do |gem|
   gem.name = "diaspora-client"
   gem.homepage = "http://github.com/rsofaer/diaspora-client"
   gem.license = "MIT"
-  gem.summary = %Q{TODO: one-line summary of your gem}
+  gem.summary = %Q{A client for connecting to Diaspora pods using OAuth2}
   gem.description = %Q{TODO: longer description of your gem}
   gem.email = "raphael@joindiaspora.com"
   gem.authors = ["Raphael Sofaer"]

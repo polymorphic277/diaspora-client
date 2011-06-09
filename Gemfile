@@ -5,6 +5,13 @@ source "http://rubygems.org"
 
 # Add dependencies to develop your gem here.
 # Include everything needed to run rake, tests, features, etc.
+
+gem 'sinatra'
+gem 'activerecord'
+gem 'oauth2'
+gem 'faraday'
+gem 'em-synchrony' if RUBY_VERSION.include? "1.9"
+
 group :development do
   gem "shoulda", ">= 0"
   gem "bundler", "~> 1.0.0"
