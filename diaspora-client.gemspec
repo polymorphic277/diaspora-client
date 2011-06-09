@@ -27,7 +27,7 @@ Gem::Specification.new do |s|
     "test/helper.rb",
     "test/test_diaspora-client.rb"
   ]
-  s.homepage = %q{http://github.com/rsofaer/diaspora-client}
+  s.homepage = %q{http://github.com/diaspora/diaspora-client}
   s.licenses = ["MIT"]
   s.require_paths = ["lib"]
   s.rubygems_version = %q{1.6.1}
