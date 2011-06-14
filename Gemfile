@@ -10,11 +10,14 @@ gem 'sinatra'
 gem 'activerecord'
 gem 'oauth2'
 gem 'faraday'
-gem 'em-synchrony' if RUBY_VERSION.include? "1.9"
+gem 'em-synchrony', :platforms => :mri_19 
 
 group :development do
   gem "shoulda", ">= 0"
   gem "bundler", "~> 1.0.0"
   gem "jeweler", "~> 1.6.2"
+  gem 'rspec', '>= 2.0.0'
   gem "rcov", ">= 0"
+  gem "sqlite3"
+  gem 'ruby-debug19', :platforms => :mri_19
 end

@@ -6,7 +6,7 @@ module DiasporaClient
       self_url = "#{self_url.host}:#{self_url.port}" if self_url.respond_to?(:host)
       pod = self.new(:host => host)
 
-      if defined?(EM::Synchrony)
+      if defined?(EM::Synchrony) && EM.reactor_running?
         connection = Faraday::Connection.new do |builder|
             builder.use Faraday::Adapter::EMSynchrony
         end
