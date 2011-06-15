@@ -20,7 +20,6 @@ module DiasporaClient
         connection = Faraday.default_connection
       end
 
-
       response = connection.post(pod.token_endpoint, pod.build_register_body)
 
       unless response.success?
@@ -57,9 +56,12 @@ module DiasporaClient
     end
 
     def full_host
-      Addressable::Template.new(
-        '{scheme}://{hostname}'
-      ).expand("scheme" => DiasporaClient.scheme, 'hostname' => self.host)
+      a = Addressable::URI.heuristic_parse(DiasporaClient.scheme + "://" + self.host)
+      a.port ||= a.inferred_port
+      a
+     #Addressable::Template.new(
+     #  '{scheme}://{hostname}'
+     #).expand("scheme" => DiasporaClient.scheme, 'hostname' => self.host.normalize)
     end
 
     def token_endpoint

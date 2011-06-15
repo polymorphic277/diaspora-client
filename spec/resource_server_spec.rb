@@ -22,7 +22,7 @@ describe DiasporaClient::ResourceServer do
 
       conn = mock()
       conn.should_receive(:post).
-        with("https://#{@host}/oauth/token", body).
+        with("https://#{@host}:443/oauth/token", body).
         and_return(response)
       Faraday::Connection.stub(:new).and_return(conn)
 
@@ -64,7 +64,7 @@ describe DiasporaClient::ResourceServer do
 
     describe '#token_endpoint' do
       it 'retruns the default route' do
-        @res.token_endpoint.should include(@res.host + "/oauth/token")
+        @res.token_endpoint.should include(@res.full_host + "/oauth/token")
       end
     end
 
@@ -76,7 +76,7 @@ describe DiasporaClient::ResourceServer do
 
     describe '#api_route' do
       it 'retruns the default route' do
-        @res.api_route.should include(@res.host + "/api/v0")
+        @res.api_route.should include(@res.full_host + "/api/v0")
       end
     end
   end
@@ -128,7 +128,7 @@ describe DiasporaClient::ResourceServer do
     it 'returns a signable string' do
       pod = ResourceServer.new(:host => @host)
       ActiveSupport::SecureRandom.stub!(:base64).and_return("nonce")
-      signable_string = ["https://example.com:443", "https://#{@host}", @time.to_i, "nonce"].join(';')
+      signable_string = ["https://example.com:443", "https://#{@host}:443", @time.to_i, "nonce"].join(';')
       pod.signable_string.should == signable_string
     end
   end

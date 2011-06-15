@@ -24,9 +24,9 @@ module DiasporaClient
     end
 
     def redirect_uri
-      uri = URI.parse(request.url)
+      uri = Addressable::URI.parse(request.url)
       uri.path = redirect_path
-      uri.query = "diaspora_handle=#{diaspora_handle}"
+      uri.query_values = {:diaspora_handle => diaspora_handle}
       uri.to_s
     end
 
@@ -35,14 +35,14 @@ module DiasporaClient
     end
 
     get '/' do
-      begin
+     begin
         redirect client.web_server.authorize_url(
           :redirect_uri => redirect_uri,
           :scope => 'profile,AS_photo:post'
         )
-      rescue Exception => e
-        redirect (back.to_s + "?diaspora-client-error=#{e.message}")
-      end
+     rescue Exception => e
+       redirect (back.to_s + "?diaspora-client-error=#{e.message}")
+     end
     end
 
     get '/callback' do
