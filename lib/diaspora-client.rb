@@ -14,6 +14,20 @@ module DiasporaClient
       block.call(self)
     end
   end
+
+
+  def self.public_key_path
+    @public_key_path
+  end
+
+  def self.public_key_path= path
+    @public_key_path = path
+  end
+
+  def self.public_key
+    @public_key ||= File.read(@public_key_path)
+  end
+
   def self.private_key_path
     @private_key_path
   end
@@ -22,15 +36,16 @@ module DiasporaClient
     @private_key_path = path
   end
 
-  def self.initialize_instance_variables
-    @private_key_path = nil
-    #@private_key_path = Rails.root + "/config/private.pem" 
-    @private_key_path = "/config/private.pem" 
-    @private_key = nil
-  end
-
   def self.private_key
     @private_key ||= OpenSSL::PKey::RSA.new(File.read(@private_key_path))
+  end
+
+  def self.initialize_instance_variables
+    @private_key_path = "/config/private.pem" 
+    @private_key = nil
+
+    @public_key_path = "/config/public.pem" 
+    @public_key = nil
   end
 end
 
