@@ -26,7 +26,7 @@ describe DiasporaClient::ResourceServer do
         and_return(response)
       Faraday::Connection.stub(:new).and_return(conn)
 
-      ResourceServer.register(@host, @self_url)
+      ResourceServer.register(@host)
     end
 
     it 'raises if the connection response is not acceptable' do
@@ -36,7 +36,7 @@ describe DiasporaClient::ResourceServer do
 
 
       lambda{
-        ResourceServer.register(@host, @self_url)
+        ResourceServer.register(@host)
       }.should raise_error /failed to connect to diaspora server/
     end
   end
@@ -90,7 +90,7 @@ describe DiasporaClient::ResourceServer do
     end
 
     it 'sets the https manifest url by default' do
-       @resource.build_register_body[:manifest_url].should == "https://example.com/manifest.json"
+       @resource.build_register_body[:manifest_url].should == "https://example.com:443/manifest.json"
     end
 
     it 'sets the http manifest url in test mode' do
@@ -99,16 +99,16 @@ describe DiasporaClient::ResourceServer do
           d.test_mode = true
           d.application_url = "url.com"
         end
-       @resource.build_register_body[:manifest_url].should == "http://url.com/manifest.json"
+       @resource.build_register_body[:manifest_url].should == "http://url.com:80/manifest.json"
     end
 
-    it 'return encoded signable string' do
+    it 'returns base64 encoded signable string' do
       str = "asdfas"
       @resource.stub(:signable_string).and_return(str)
       @resource.build_register_body[:signed_string].should == Base64.encode64(str)
     end
 
-    it 'return encoded signature' do
+    it 'returns base64 encoded signature' do
       str = "SIG"
       @resource.stub(:signature).and_return(str)
       @resource.build_register_body[:signature].should == Base64.encode64(str)
@@ -128,8 +128,8 @@ describe DiasporaClient::ResourceServer do
     it 'returns a signable string' do
       pod = ResourceServer.new(:host => @host)
       ActiveSupport::SecureRandom.stub!(:base64).and_return("nonce")
-      signable_string = ["http://#{@self_url}/", "http://#{@host}/", @time.to_i, "nonce"].join(';')
-      pod.signable_string(@self_url).should == signable_string
+      signable_string = ["https://example.com:443", "https://#{@host}", @time.to_i, "nonce"].join(';')
+      pod.signable_string.should == signable_string
     end
   end
 end

@@ -5,8 +5,7 @@ module DiasporaClient
   class ResourceServer < ActiveRecord::Base
     attr_accessible :host, :client_id, :client_secret
 
-    def self.register(host, self_url)
-      self_url = "#{self_url.host}:#{self_url.port}" if self_url.respond_to?(:host)
+    def self.register(host)
       pod = self.new(:host => host)
 
 # TODO
@@ -33,18 +32,15 @@ module DiasporaClient
       pod.save!
       pod
     end
-
-    def signable_string(self_url)
-      [ "http://#{self_url}/",
-        "http://#{self.host}/",
-        Time.now.to_i,
-        ActiveSupport::SecureRandom.base64(32)
-      ].join(';')
+    
+    #client methods
+    def client
+      @client ||= OAuth2::Client.new(client_id, client_secret, :site => self.api_route)
     end
 
+
     def build_register_body
-      self_url = DiasporaClient.application_host
-      signable_str = self.signable_string(self_url)
+      signable_str = self.signable_string
       {
         :type => :client_associate,
         :manifest_url => self.manifest_url,
@@ -53,6 +49,7 @@ module DiasporaClient
       }
     end
 
+    #url helper methods
     def manifest_url
       url = DiasporaClient.application_host
       url.path = '/manifest.json'
@@ -77,12 +74,17 @@ module DiasporaClient
       url.to_s
     end
 
+    #encryption methods
    def signature(plaintext)
      DiasporaClient.private_key.sign( OpenSSL::Digest::SHA256.new, plaintext)
    end
 
-    def client
-      @client ||= OAuth2::Client.new(client_id, client_secret, :site => self.api_route)
+    def signable_string
+      [ DiasporaClient.application_host,
+        self.full_host,
+        Time.now.to_i,
+        ActiveSupport::SecureRandom.base64(32)
+      ].join(';')
     end
   end
 end

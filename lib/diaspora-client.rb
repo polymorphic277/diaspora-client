@@ -50,6 +50,7 @@ module DiasporaClient
   def self.application_host
     host = Addressable::URI.heuristic_parse(@application_url)
     host.scheme = self.scheme
+    host.port = host.inferred_port
     host
   end
 

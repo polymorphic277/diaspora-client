@@ -7,7 +7,7 @@ module DiasporaClient
     def pod
       @pod ||= lambda{
         host = diaspora_handle.split('@')[1]
-        ResourceServer.where(:host => host).first || ResourceServer.register(host, URI.parse(request.url))
+        ResourceServer.where(:host => host).first || ResourceServer.register(host)
       }.call
     end
 
