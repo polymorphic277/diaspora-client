@@ -8,6 +8,12 @@ module DiasporaClient
   autoload :ResourceServer, File.join('diaspora-client', 'resource_server')
 
 
+  def self.config(&block)
+    self.initialize_instance_variables
+    if block_given?
+      block.call(self)
+    end
+  end
   def self.private_key_path
     @private_key_path
   end
@@ -18,16 +24,13 @@ module DiasporaClient
 
   def self.initialize_instance_variables
     @private_key_path = nil
-    if defined?(Rails) && !Rails.root.nil?
-      @private_key_path = Rails.root + "/config/private.pem" 
-    end
-
+    #@private_key_path = Rails.root + "/config/private.pem" 
+    @private_key_path = "/config/private.pem" 
     @private_key = nil
   end
 
   def self.private_key
     @private_key ||= OpenSSL::PKey::RSA.new(File.read(@private_key_path))
   end
-  self.initialize_instance_variables
 end
 
