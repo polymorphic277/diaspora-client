@@ -35,10 +35,14 @@ module DiasporaClient
     end
 
     get '/' do
-      redirect client.web_server.authorize_url(
-        :redirect_uri => redirect_uri,
-        :scope => 'profile,AS_photo:post'
-      )
+      begin
+        redirect client.web_server.authorize_url(
+          :redirect_uri => redirect_uri,
+          :scope => 'profile,AS_photo:post'
+        )
+      rescue Exception => e
+        redirect (back.to_s + "?diaspora-client-error=#{e.message}")
+      end
     end
 
     get '/callback' do

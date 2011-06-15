@@ -19,5 +19,6 @@ group :development do
   gem 'rspec', '>= 2.0.0'
   gem "rcov", ">= 0"
   gem "sqlite3"
+  gem 'rack-test'
   gem 'ruby-debug19', :platforms => :mri_19
 end

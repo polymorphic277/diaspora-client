@@ -8,6 +8,7 @@ rescue Bundler::BundlerError => e
   exit e.status_code
 end
 require 'rspec'
+require 'rack/test'
 require 'shoulda'
 
 

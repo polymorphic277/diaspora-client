@@ -15,7 +15,18 @@ module DiasporaClient
     end
   end
 
+  def self.scheme
+    @test_mode ? 'http' : 'https'
+  end
 
+  def self.test_mode=(value)
+    @test_mode = value
+  end
+
+  def self.application_url=(value)
+    @application_url = value
+  end
+  
   def self.public_key_path
     @public_key_path
   end
@@ -36,6 +47,12 @@ module DiasporaClient
     @private_key_path = path
   end
 
+  def self.application_host
+    host = Addressable::URI.heuristic_parse(@application_url)
+    host.scheme = self.scheme
+    host
+  end
+
   def self.private_key
     @private_key ||= OpenSSL::PKey::RSA.new(File.read(@private_key_path))
   end
@@ -46,6 +63,8 @@ module DiasporaClient
 
     @public_key_path = "/config/public.pem" 
     @public_key = nil
+    @test_mode = false
+    @application_url = 'example.com'
   end
 end
 
