@@ -10,6 +10,7 @@ module DiasporaClient
 
   def self.config(&block)
     self.initialize_instance_variables
+
     if block_given?
       block.call(self)
     end
@@ -47,6 +48,17 @@ module DiasporaClient
     @private_key_path = path
   end
 
+  def self.setup_faraday
+     Faraday.default_connection = Faraday::Connection.new do |builder|
+       builder.use Faraday::Request::JSON
+       if(defined?(EM::Synchrony) && EM.reactor_running?)
+         builder.use Faraday::Adapter::EMSynchrony  
+       else
+         builder.adapter :net_http
+       end
+     end
+  end
+
   def self.application_host
     host = Addressable::URI.heuristic_parse(@application_url)
     host.scheme = self.scheme
@@ -66,6 +78,7 @@ module DiasporaClient
     @public_key = nil
     @test_mode = false
     @application_url = 'example.com'
+    self.setup_faraday
   end
 end
 

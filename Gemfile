@@ -11,6 +11,8 @@ gem 'activerecord'
 gem 'oauth2'
 gem 'faraday'
 gem 'em-synchrony', :platforms => :mri_19 
+gem 'em-http-request', :platform => :mri_19
+gem 'rack-fiber_pool', :require => 'rack/fiber_pool', :platform => :mri_19
 
 group :development do
   gem "shoulda", ">= 0"

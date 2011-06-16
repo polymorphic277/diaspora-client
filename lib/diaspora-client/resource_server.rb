@@ -8,20 +8,9 @@ module DiasporaClient
     def self.register(host)
       pod = self.new(:host => host)
 
-# TODO
-#     connection = Faraday::Connection.new do |builder|
-#       builder.use Faraday::Adapter::EMSynchrony  if(defined?(EM::Synchrony) && EM.reactor_running?)
-#     end
-      if defined?(EM::Synchrony) && EM.reactor_running?
-        connection = Faraday::Connection.new do |builder|
-            builder.use Faraday::Adapter::EMSynchrony
-        end
-      else
-        connection = Faraday.default_connection
-      end
+      response = Faraday.post(pod.token_endpoint, pod.build_register_body)
 
-      response = connection.post(pod.token_endpoint, pod.build_register_body)
-
+     
       unless response.success?
         raise "failed to connect to diaspora server"
       end
@@ -59,9 +48,6 @@ module DiasporaClient
       a = Addressable::URI.heuristic_parse(DiasporaClient.scheme + "://" + self.host)
       a.port ||= a.inferred_port
       a
-     #Addressable::Template.new(
-     #  '{scheme}://{hostname}'
-     #).expand("scheme" => DiasporaClient.scheme, 'hostname' => self.host.normalize)
     end
 
     def token_endpoint

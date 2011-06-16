@@ -24,7 +24,7 @@ describe DiasporaClient::ResourceServer do
       conn.should_receive(:post).
         with("https://#{@host}:443/oauth/token", body).
         and_return(response)
-      Faraday::Connection.stub(:new).and_return(conn)
+      Faraday.stub(:default_connection).and_return(conn)
 
       ResourceServer.register(@host)
     end

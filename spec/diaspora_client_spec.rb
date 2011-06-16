@@ -59,4 +59,28 @@ describe DiasporaClient do
       end
     end  
   end
+
+  describe 'setup_faraday' do
+    it 'uses net:http if not in a reactor and 1.9.2' do
+      DiasporaClient.setup_faraday
+
+      conn = Faraday.default_connection
+      conn.builder.handlers.should_not include(Faraday::Adapter::EMSynchrony)
+    end
+
+    it 'uses JSON encode request' do
+      DiasporaClient.setup_faraday
+
+      conn = Faraday.default_connection
+      conn.builder.handlers.should include(Faraday::Request::JSON)
+    end
+
+    it 'uses net:http if not in a reactor and 1.9.2' do
+      EM.stub(:reactor_running?).and_return(true)
+      DiasporaClient.setup_faraday
+
+      conn = Faraday.default_connection
+      conn.builder.handlers.should include(Faraday::Adapter::EMSynchrony)
+    end
+  end
 end
