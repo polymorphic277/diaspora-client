@@ -4,7 +4,7 @@ module DiasporaClient
     belongs_to :resource_server
 
     def token
-      @token ||= OAuth2::AccessToken.new( resource_server.client, access_token, refresh_token, expires_in)
+      @token ||= OAuth2::AccessToken.new( resource_server.client, access_token, refresh_token, expires_in, :adapter => DiasporaClient.which_faraday_adapter?)
     end
 
     def expires_in

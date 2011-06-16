@@ -48,14 +48,18 @@ module DiasporaClient
     @private_key_path = path
   end
 
+  def self.which_faraday_adapter?
+    if(defined?(EM::Synchrony) && EM.reactor_running?)
+      :em_synchrony  
+    else
+      :net_http
+    end
+
+  end
   def self.setup_faraday
      Faraday.default_connection = Faraday::Connection.new do |builder|
        builder.use Faraday::Request::JSON
-       if(defined?(EM::Synchrony) && EM.reactor_running?)
-         builder.use Faraday::Adapter::EMSynchrony  
-       else
-         builder.adapter :net_http
-       end
+       builder.adapter self.which_faraday_adapter? 
      end
   end
 
