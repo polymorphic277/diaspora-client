@@ -1,6 +1,12 @@
 = diaspora-client
 
-Description goes here.
+Diaspora Client is a gem that strives to make intergration into the Diaspora ecosystem a breeze.
+
+To generate a keypair run:
+
+rake generate_keys
+
+
 
 == Contributing to diaspora-client
  

@@ -57,7 +57,11 @@ describe DiasporaClient do
       DiasporaClient.should_receive(:initialize_instance_variables)
       DiasporaClient.config do |d|
       end
-    end  
+    end
+
+    it 'sets the permission requests and descriptions' do
+      pending
+    end
   end
 
   describe 'setup_faraday' do
