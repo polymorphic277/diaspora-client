@@ -16,3 +16,7 @@ task :generate_keys do
   pub_f.write(priv_key.public_key.export)
   pub_f.close
 end
+
+task :generate_manifest => :environment do
+  puts DiasporaClient.private_key
+end

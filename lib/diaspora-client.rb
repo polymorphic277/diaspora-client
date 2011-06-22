@@ -10,6 +10,34 @@ module DiasporaClient
   autoload :ResourceServer, File.join('diaspora-client', 'resource_server')
 
 
+  def self.setter_string(field)
+    "def self.#{field}=(val) ; @#{field} = val ; end"
+  end
+
+  def self.getter_string(field)
+    "def self.#{field} ; @#{field} ; end"
+  end
+
+  #setters
+  [:test_mode,
+   :application_url].each do |field|
+
+      eval(self.setter_string(field))
+  end
+
+  #getters and setters
+  [:app_name,
+   :description,
+   :homepage_url,
+   :icon_url,
+   :permissions_overview,
+   :private_key_path,
+   :public_key_path].each do |field|
+
+      eval(self.getter_string(field))
+      eval(self.setter_string(field))
+  end
+
   def self.config(&block)
     self.initialize_instance_variables
 
@@ -22,32 +50,12 @@ module DiasporaClient
     @test_mode ? 'http' : 'https'
   end
 
-  def self.test_mode=(value)
-    @test_mode = value
-  end
-
-  def self.application_url=(value)
-    @application_url = value
-  end
-  
-  def self.public_key_path
-    @public_key_path
-  end
-
-  def self.public_key_path= path
-    @public_key_path = path
-  end
-
   def self.public_key
     @public_key ||= File.read(@public_key_path)
   end
 
-  def self.private_key_path
-    @private_key_path
-  end
-
-  def self.private_key_path= path
-    @private_key_path = path
+  def self.private_key
+    @private_key ||= OpenSSL::PKey::RSA.new(File.read(@private_key_path))
   end
 
   def self.which_faraday_adapter?
@@ -56,8 +64,8 @@ module DiasporaClient
     else
       :net_http
     end
-
   end
+
   def self.setup_faraday
      Faraday.default_connection = Faraday::Connection.new do |builder|
        builder.use Faraday::Request::JSON
@@ -72,16 +80,15 @@ module DiasporaClient
     host
   end
 
-  def self.private_key
-    @private_key ||= OpenSSL::PKey::RSA.new(File.read(@private_key_path))
-  end
-
   def self.initialize_instance_variables
-    @private_key_path = "/config/private.pem" 
+    app_name = (defined?(Rails)) ? "#{Rails.application.class.parent_name}." : ""
+
+    @private_key_path = "/config/#{app_name}private.pem"
     @private_key = nil
 
-    @public_key_path = "/config/public.pem" 
+    @public_key_path = "/config/#{app_name}public.pem"
     @public_key = nil
+
     @test_mode = false
     @application_url = 'example.com'
     self.setup_faraday

@@ -59,8 +59,29 @@ describe DiasporaClient do
       end
     end
 
+    it 'sets the manifest fields' do
+      DiasporaClient.config do |d|
+        d.app_name = "Chubbies"
+        d.description = "The best way to chub."
+        d.homepage_url = "http://localhost:9292/"
+        d.icon_url = "#"
+
+        d.permissions_overview = "Chubbi.es wants to post photos to your stream."
+      end
+
+      DiasporaClient.app_name.should == "Chubbies"
+      DiasporaClient.description.should == "The best way to chub."
+      DiasporaClient.homepage_url.should == "http://localhost:9292/"
+      DiasporaClient.icon_url.should == "#"
+      DiasporaClient.permissions_overview.should == "Chubbi.es wants to post photos to your stream."
+    end
+
     it 'sets the permission requests and descriptions' do
       pending
+      DiasporaClient.config do |d|
+        d.permission(PROFILE, READ, "Chubbi.es wants to view your profile so that it can show it to other users.")
+        d.permission(PHOTOS, WRITE, "Chubbi.es wants to write to your photos to share your findings with your contacts.")
+      end
     end
   end
 
