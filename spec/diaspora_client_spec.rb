@@ -61,27 +61,36 @@ describe DiasporaClient do
 
     it 'sets the manifest fields' do
       DiasporaClient.config do |d|
-        d.app_name = "Chubbies"
-        d.description = "The best way to chub."
-        d.homepage_url = "http://localhost:9292/"
-        d.icon_url = "#"
+        d.manifest_field(:app_name, "Chubbies")
+        d.manifest_field(:description, "The best way to chub.")
+        d.manifest_field(:homepage_url, "http://localhost:9292/")
+        d.manifest_field(:icon_url, "#")
 
-        d.permissions_overview = "Chubbi.es wants to post photos to your stream."
+        d.manifest_field(:permissions_overview, "Chubbi.es wants to post photos to your stream.")
       end
 
-      DiasporaClient.app_name.should == "Chubbies"
-      DiasporaClient.description.should == "The best way to chub."
-      DiasporaClient.homepage_url.should == "http://localhost:9292/"
-      DiasporaClient.icon_url.should == "#"
-      DiasporaClient.permissions_overview.should == "Chubbi.es wants to post photos to your stream."
+      DiasporaClient.manifest_fields[:app_name].should == "Chubbies"
+      DiasporaClient.manifest_fields[:description].should == "The best way to chub."
+      DiasporaClient.manifest_fields[:homepage_url].should == "http://localhost:9292/"
+      DiasporaClient.manifest_fields[:icon_url].should == "#"
+      DiasporaClient.manifest_fields[:permissions_overview].should == "Chubbi.es wants to post photos to your stream."
     end
 
     it 'sets the permission requests and descriptions' do
-      pending
       DiasporaClient.config do |d|
-        d.permission(PROFILE, READ, "Chubbi.es wants to view your profile so that it can show it to other users.")
-        d.permission(PHOTOS, WRITE, "Chubbi.es wants to write to your photos to share your findings with your contacts.")
+       d.permission(:profile, :read, "Chubbi.es wants to view your profile so that it can show it to other users.")
+       d.permission(:photos, :write, "Chubbi.es wants to write to your photos to share your findings with your contacts.")
       end
+
+      pr = DiasporaClient.permissions[:profile]
+      pr[:access].should == DiasporaClient::READ
+      pr[:type].should == DiasporaClient::PROFILE
+      pr[:description].should == "Chubbi.es wants to view your profile so that it can show it to other users."
+
+      pr = DiasporaClient.permissions[:photos]
+      pr[:access].should == DiasporaClient::WRITE
+      pr[:type].should == DiasporaClient::PHOTOS
+      pr[:description].should == "Chubbi.es wants to write to your photos to share your findings with your contacts."
     end
   end
 
@@ -106,6 +115,54 @@ describe DiasporaClient do
 
       conn = Faraday.default_connection
       conn.builder.handlers.should include(Faraday::Adapter::EMSynchrony)
+    end
+  end
+
+  describe ".generate_manifest" do
+    before do
+      pub_key_path = File.dirname(__FILE__) + "/chubbies.public.pem"
+      private_key_path = File.dirname(__FILE__) + "/chubbies.private.pem"
+
+      DiasporaClient.config do |d|
+        d.public_key_path = pub_key_path
+        d.private_key_path = private_key_path
+
+        d.manifest_field(:app_name, "Chubbies")
+        d.manifest_field(:description, "The best way to chub.")
+        d.manifest_field(:homepage_url, "http://localhost:9292/")
+        d.manifest_field(:icon_url, "#")
+
+        d.manifest_field(:permissions_overview, "Chubbi.es wants to post photos to your stream.")
+
+        d.permission(:profile, :read, "Chubbi.es wants to view your profile so that it can show it to other users.")
+        d.permission(:photos, :write, "Chubbi.es wants to write to your photos to share your findings with your contacts.")
+      end
+    end
+
+    it 'puts the public key in the manifest' do
+      JSON.parse(DiasporaClient.package_manifest)['public_key'].should_not be_blank
+    end
+
+    context "JWT" do
+      before do
+        @packaged_manifest_jwt = JSON.parse(DiasporaClient.package_manifest)['jwt']
+        @pub_key = OpenSSL::PKey::RSA.new(DiasporaClient.public_key)
+      end
+
+      it 'is present' do
+        @packaged_manifest_jwt.should_not be_blank
+      end
+
+      it 'has all manifest fields' do
+        JWT.decode(@packaged_manifest_jwt, @pub_key).symbolize_keys.should include(DiasporaClient.manifest_fields)
+      end
+
+      it 'has all permission fields' do
+        jwt_permissions = JWT.decode(@packaged_manifest_jwt, @pub_key)["permissions"].symbolize_keys
+        jwt_permissions.keys.each do |key|
+          jwt_permissions[key].symbolize_keys.should == DiasporaClient.permissions[key]
+        end
+      end
     end
   end
 end

@@ -10,7 +10,8 @@ gem 'sinatra'
 gem 'activerecord'
 gem 'oauth2'
 gem 'faraday'
-gem 'em-synchrony', :platforms => :mri_19 
+gem 'jwt', :git => "https://github.com/zhitomirskiyi/ruby-jwt"
+gem 'em-synchrony', :platform => :mri_19 
 gem 'em-http-request', :platform => :mri_19
 gem 'rack-fiber_pool', :require => 'rack/fiber_pool', :platform => :mri_19
 
@@ -22,5 +23,5 @@ group :development do
   gem "rcov", ">= 0"
   gem "sqlite3"
   gem 'rack-test'
-  gem 'ruby-debug19', :platforms => :mri_19
+  gem 'ruby-debug19', :platform => :mri_19
 end
