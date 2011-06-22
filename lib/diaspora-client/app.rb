@@ -41,7 +41,7 @@ module DiasporaClient
           :scope => 'profile,AS_photo:post'
         )
      rescue Exception => e
-       redirect (back.to_s + "?diaspora-client-error=#{e.message}")
+       redirect (back.to_s + "?diaspora-client-error=#{URI.escape(e.message)}")
      end
     end
 

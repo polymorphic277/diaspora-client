@@ -61,7 +61,7 @@ describe DiasporaClient do
 
     it 'sets the manifest fields' do
       DiasporaClient.config do |d|
-        d.manifest_field(:app_name, "Chubbies")
+        d.manifest_field(:name, "Chubbies")
         d.manifest_field(:description, "The best way to chub.")
         d.manifest_field(:homepage_url, "http://localhost:9292/")
         d.manifest_field(:icon_url, "#")
@@ -69,7 +69,7 @@ describe DiasporaClient do
         d.manifest_field(:permissions_overview, "Chubbi.es wants to post photos to your stream.")
       end
 
-      DiasporaClient.manifest_fields[:app_name].should == "Chubbies"
+      DiasporaClient.manifest_fields[:name].should == "Chubbies"
       DiasporaClient.manifest_fields[:description].should == "The best way to chub."
       DiasporaClient.manifest_fields[:homepage_url].should == "http://localhost:9292/"
       DiasporaClient.manifest_fields[:icon_url].should == "#"
@@ -127,7 +127,7 @@ describe DiasporaClient do
         d.public_key_path = pub_key_path
         d.private_key_path = private_key_path
 
-        d.manifest_field(:app_name, "Chubbies")
+        d.manifest_field(:name, "Chubbies")
         d.manifest_field(:description, "The best way to chub.")
         d.manifest_field(:homepage_url, "http://localhost:9292/")
         d.manifest_field(:icon_url, "#")
