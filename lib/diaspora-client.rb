@@ -17,36 +17,58 @@ module DiasporaClient
   WRITE = "write"
 
 
-  def self.setter_string(field)
-    "def self.#{field}=(val) ; @#{field} = val ; end"
+  # Sets setter field(s) for the module.
+  #
+  # @param [Symbol, String] fields Variables to be set
+  # @return [void]
+  def self.setter(*fields)
+    fields.each do |f|
+      eval("def self.#{f}=(val) ; @#{f} = val ; end")
+    end
   end
 
-  def self.getter_string(field)
-    "def self.#{field} ; @#{field} ; end"
+  # Sets getter field(s) for the module.
+  #
+  # @param [Symbol, String] fields Variable to be retrieved
+  # @return [void]
+  def self.getter(*fields)
+    fields.each do |f|
+      eval("def self.#{f} ; @#{f} ; end")
+    end
   end
 
-  #setters
-  [:test_mode,
-   :application_url].each do |field|
 
-      eval(self.setter_string(field))
-  end
+  self.setter :test_mode,
+              :application_url,
+              :private_key_path,
+              :public_key_path,
+              :permissions
 
-  #getter
-  [:manifest_fields].each do |field|
+  self.getter :manifest_fields,
+              :private_key_path,
+              :public_key_path,
+              :permissions
 
-    eval(self.getter_string(field))
-  end
 
-  #getters and setters
-  [:private_key_path,
-   :public_key_path,
-   :permissions].each do |field|
-
-      eval(self.getter_string(field))
-      eval(self.setter_string(field))
-  end
-
+  # Calls {.initialize_instance_variables} and yields to a given (optional) config block.
+  #
+  # @example
+  #   DiasporaClient.config do |d|
+  #     d.test_mode = true
+  #     d.application_url = "http://chubbi.es/"
+  #
+  #     d.manifest_field(:name, "Chubbies")
+  #     d.manifest_field(:description, "The best way to chub.")
+  #     d.manifest_field(:homepage_url, "http://chubbi.es/")
+  #     d.manifest_field(:icon_url, "#")
+  #
+  #     d.manifest_field(:permissions_overview, "Chubbi.es wants to post photos to your stream.")
+  #
+  #     d.permission(:profile, :read, "Chubbi.es wants to view your profile so that it can show it to other users.")
+  #     d.permission(:photos, :write, "Chubbi.es wants to write to your photos to share your findings with your contacts.")
+  #   end
+  #
+  # @return [void]
   def self.config(&block)
     self.initialize_instance_variables
 
@@ -55,18 +77,32 @@ module DiasporaClient
     end
   end
 
+  # Application's current protocol (http/https).
+  # The test_mode configuration flag will turn SSL off.
+  #
+  # @return [String] Protocol
   def self.scheme
     @test_mode ? 'http' : 'https'
   end
 
+  # Retreive the application's public key.
+  #
+  # @return [String] Application's public key
   def self.public_key
     @public_key ||= File.read(@public_key_path)
   end
 
+  # Retreive the application's private key.
+  #
+  # @return [OpenSSL::PKey::RSA] Application's private key
   def self.private_key
     @private_key ||= OpenSSL::PKey::RSA.new(File.read(@private_key_path))
   end
 
+  # Returns either :em_synchrony or :net_http for Faraday according to
+  # if the application is running in an EventMachine reactor loop.
+  #
+  # @return [Symbol] The Faraday adapter.
   def self.which_faraday_adapter?
     if(defined?(EM::Synchrony) && EM.reactor_running?)
       :em_synchrony  
@@ -75,7 +111,7 @@ module DiasporaClient
     end
   end
 
-  # Configures Faraday for JSON requests
+  # Configures Faraday for JSON requests.
   #
   # @return [void]
   def self.setup_faraday
@@ -85,7 +121,7 @@ module DiasporaClient
     end
   end
 
-  # Parses host and port from @application_url
+  # Parses host and port from @application_url.
   # 
   # @return [String] Host of application
   def self.application_host
@@ -117,7 +153,11 @@ module DiasporaClient
     @faraday_initialized = nil
   end
 
-  # Defines a field to be placed in the application's manifest
+  # Defines a field to be placed in the application's manifest.
+  #
+  # @example
+  #  manifest_field(:description, "This application is totally bananas.")
+  #
   #
   # @param [Symbol] field
   # @param [String] value
@@ -127,7 +167,10 @@ module DiasporaClient
     nil
   end
 
-  # Defines the permissions the applicaiton is attempting to access
+  # Defines the permissions the applicaiton is attempting to access.
+  #
+  # @example
+  #  permission(:profile, :read, "Chubbi.es wants to view your profile so that it can show it to other users.")
   #
   # @param [Symbol] type The type of content to be accessed
   # @param [Symbol] access Read/write access of the specified type

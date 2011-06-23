@@ -37,7 +37,7 @@ describe DiasporaClient::ResourceServer do
 
       lambda{
         ResourceServer.register(@host)
-      }.should raise_error /failed to connect to diaspora server/
+      }.should raise_error /Failed to connect to Diaspora server./
     end
   end
 

@@ -1,9 +1,16 @@
 module DiasporaClient
   class App < Sinatra::Base
+    
+    # @return [OAuth2::Client] The connecting Diaspora installation's Client object.
+    # @see #pod
     def client
       pod.client
     end
 
+    # Find a pre-existing Diaspora server, or register with a new one.
+    #
+    # @note The Diaspora server is parsed from the domain in the given diaspora handle.
+    # @return [ResourceServer]
     def pod
       @pod ||= lambda{
         host = diaspora_handle.split('@')[1]
@@ -11,18 +18,25 @@ module DiasporaClient
       }.call
     end
 
+    # Retreive the user's Diaspora handle from the params hash.
+    #
+    # @return [String]
     def diaspora_handle
       params['diaspora_handle']
     end
 
+    # @return [String] The path to hit after retreiving an access token from a Diaspora server.
     def redirect_path
       '/auth/diaspora/callback'
     end
 
+    # @return [String] The path to send the user after the OAuth2 dance is complete.
     def after_oauth_redirect_path
       '/users/edit'
     end
 
+    # @return [String] The URL to hit after retreiving an access token from a Diaspora server.
+    # @see #redirect_path
     def redirect_uri
       uri = Addressable::URI.parse(request.url)
       uri.path = redirect_path
@@ -30,10 +44,12 @@ module DiasporaClient
       uri.to_s
     end
 
+    # @return [User] The current user stored in warden.
     def current_user
       request.env["warden"].user
     end
 
+    # @return [void]
     get '/' do
 
       # ensure faraday is configured
@@ -49,6 +65,7 @@ module DiasporaClient
       end
     end
 
+    # @return [void]
     get '/callback' do
       unless params["error"]
         access_token = client.web_server.get_access_token(params[:code], :redirect_uri => redirect_uri)
@@ -66,6 +83,9 @@ module DiasporaClient
       redirect after_oauth_redirect_path
     end
 
+    # Destroy the current user's access token and redirect.
+    #
+    # @return [void]
     delete '/' do
       current_user.access_token.destroy
       redirect after_oauth_redirect_path
