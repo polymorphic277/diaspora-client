@@ -101,13 +101,15 @@ module DiasporaClient
   # @return [void]
   def self.initialize_instance_variables
     app_name = (defined?(Rails)) ? "#{Rails.application.class.parent_name}." : ""
+    app_root = (defined?(Rails)) ? "#{Rails.root}" : ""
+
     @permissions = {}
     @manifest_fields = {}
 
-    @private_key_path = "/config/#{app_name}private.pem"
+    @private_key_path = "#{app_root}/config/#{app_name}private.pem"
     @private_key = nil
 
-    @public_key_path = "/config/#{app_name}public.pem"
+    @public_key_path = "#{app_root}/config/#{app_name}public.pem"
     @public_key = nil
 
     @test_mode = false
