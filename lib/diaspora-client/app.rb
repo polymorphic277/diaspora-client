@@ -35,14 +35,18 @@ module DiasporaClient
     end
 
     get '/' do
-     begin
+
+      # ensure faraday is configured
+      DiasporaClient.setup_faraday 
+
+      begin
         redirect client.web_server.authorize_url(
           :redirect_uri => redirect_uri,
           :scope => 'profile,AS_photo:post'
         )
-     rescue Exception => e
-       redirect (back.to_s + "?diaspora-client-error=#{URI.escape(e.message)}")
-     end
+      rescue Exception => e
+        redirect (back.to_s + "?diaspora-client-error=#{URI.escape(e.message)}")
+      end
     end
 
     get '/callback' do

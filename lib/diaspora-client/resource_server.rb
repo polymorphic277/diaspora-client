@@ -7,9 +7,7 @@ module DiasporaClient
 
     def self.register(host)
       pod = self.new(:host => host)
-
       response = Faraday.post(pod.token_endpoint, pod.build_register_body)
-
      
       unless response.success?
         raise "failed to connect to diaspora server"

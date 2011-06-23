@@ -79,7 +79,7 @@ module DiasporaClient
   #
   # @return [void]
   def self.setup_faraday
-    Faraday.default_connection = Faraday::Connection.new do |builder|
+    @faraday_initialized ||= Faraday.default_connection = Faraday::Connection.new do |builder|
       builder.use Faraday::Request::JSON
       builder.adapter self.which_faraday_adapter? 
     end
@@ -96,7 +96,6 @@ module DiasporaClient
   end
 
   # Initilizes public & private keys, permissions and manifest fields.
-  # This method also runs setup_faraday.
   #
   # @return [void]
   def self.initialize_instance_variables
@@ -114,7 +113,8 @@ module DiasporaClient
 
     @test_mode = false
     @application_url = 'example.com'
-    self.setup_faraday
+
+    @faraday_initialized = nil
   end
 
   # Defines a field to be placed in the application's manifest
