@@ -68,12 +68,6 @@ describe DiasporaClient::ResourceServer do
       end
     end
 
-    describe '#manifest_url' do
-      it 'retruns the default route' do
-        @res.manifest_url.should == DiasporaClient.application_host.to_s + "/manifest.json"
-      end
-    end
-
     describe '#api_route' do
       it 'retruns the default route' do
         @res.api_route.should include(@res.full_host + "/api/v0")
@@ -89,17 +83,17 @@ describe DiasporaClient::ResourceServer do
       @resource.build_register_body[:type].should == :client_associate
     end
 
-    it 'sets the https manifest url by default' do
-       @resource.build_register_body[:manifest_url].should == "https://example.com:443/manifest.json"
+    it 'sets the https app url by default' do
+       @resource.build_register_body[:app_url].should == "https://example.com:443"
     end
 
-    it 'sets the http manifest url in test mode' do
+    it 'sets the http app url in test mode' do
        @resource.stub(:signature).and_return("YAY!!")
         DiasporaClient.config do |d|
           d.test_mode = true
           d.application_url = "url.com"
         end
-       @resource.build_register_body[:manifest_url].should == "http://url.com:80/manifest.json"
+       @resource.build_register_body[:app_url].should == "http://url.com:80"
     end
 
     it 'returns base64 encoded signable string' do

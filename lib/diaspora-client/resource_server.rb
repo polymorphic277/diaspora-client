@@ -24,11 +24,13 @@ module DiasporaClient
       @client ||= OAuth2::Client.new(client_id, client_secret, :site => api_route)
     end
 
+    # Constructs the body of the request during registration.
+    #
+    # @return [Hash] Parameters of the pre-registration request
     def build_register_body
       signable_str = self.signable_string
       {
         :type => :client_associate,
-        :manifest_url => manifest_url,
         :signed_string => Base64.encode64(signable_str),
         :signature => Base64.encode64(signature(signable_str))
       }
@@ -47,14 +49,6 @@ module DiasporaClient
     end
 
     #TODO(*) these methods should be private -----------------------------------
-
-    # @note Indicative of internal server.
-    # @return [String] Manifest location.
-    def manifest_url
-      url = DiasporaClient.application_host
-      url.path = '/manifest.json'
-      url.to_s
-    end
 
     # @note Indicative of interal server.
     # @return [String] Host with protocol and optional port.
