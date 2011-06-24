@@ -6,7 +6,7 @@ module DiasporaClient
     attr_accessible :host, :client_id, :client_secret
 
     def self.register(host)
-      pod = self.new(:host => host)
+      pod = self.find_or_initialize_by_host(host)
       response = Faraday.post(pod.token_endpoint, pod.build_register_body)
      
       unless response.success?

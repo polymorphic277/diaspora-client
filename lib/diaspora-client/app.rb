@@ -75,7 +75,7 @@ module DiasporaClient
 
     # @return [void]
     get '/callback' do
-      unless params["error"]
+      if !params["error"]
         access_token = client.web_server.get_access_token(params[:code], :redirect_uri => redirect_uri)
         user = JSON.parse(access_token.get('/api/v0/me'))
 
@@ -86,6 +86,9 @@ module DiasporaClient
           :refresh_token => access_token.refresh_token,
           :expires_at => access_token.expires_at
         )
+      elsif params["error"] == "invalid_client"
+        ResourceServer.register(diaspora_handle.split('@')[1])
+        redirect "/?diaspora_handle=#{diaspora_handle}"
       end
 
       redirect after_oauth_redirect_path
