@@ -61,7 +61,15 @@ module DiasporaClient
           :scope => 'profile,AS_photo:post'
         )
       rescue Exception => e
-        redirect (back.to_s + "?diaspora-client-error=#{URI.escape(e.message)}")
+        redirect_url = back.to_s
+        if defined?(Rails)
+          flash_class = ActionDispatch::Flash
+          flash = request.env["action_dispatch.request.flash_hash"] ||= flash_class::FlashHash.new
+          flash.alert = e.message
+        else
+          redirect_url << "?diaspora-client-error=#{URI.escape(e.message)}"
+        end
+        redirect redirect_url
       end
     end
 
