@@ -49,7 +49,7 @@ describe DiasporaClient::ResourceServer do
       it 'returns the https url by default' do
         @res.full_host.scheme.should == "https"
       end
-      
+
       it 'returns the http scheme if test mode is configured' do
         DiasporaClient.config do |d|
           d.test_mode = true
@@ -81,19 +81,6 @@ describe DiasporaClient::ResourceServer do
     end
     it 'sets the type' do
       @resource.build_register_body[:type].should == :client_associate
-    end
-
-    it 'sets the https app url by default' do
-       @resource.build_register_body[:app_url].should == "https://example.com:443"
-    end
-
-    it 'sets the http app url in test mode' do
-       @resource.stub(:signature).and_return("YAY!!")
-        DiasporaClient.config do |d|
-          d.test_mode = true
-          d.application_url = "url.com"
-        end
-       @resource.build_register_body[:app_url].should == "http://url.com:80"
     end
 
     it 'returns base64 encoded signable string' do

@@ -12,8 +12,8 @@ describe DiasporaClient do
         p.private_key_path = private_key_path
       end
 
-      @priv_key_fixture = File.read(private_key_path) 
-      @public_key_fixture = File.read(pub_key_path) 
+      @priv_key_fixture = File.read(private_key_path)
+      @public_key_fixture = File.read(pub_key_path)
     end
 
     it 'returns an OpenSSL key' do
@@ -76,6 +76,7 @@ describe DiasporaClient do
       DiasporaClient.manifest_fields[:permissions_overview].should == "Chubbi.es wants to post photos to your stream."
     end
 
+
     it 'sets the permission requests and descriptions' do
       DiasporaClient.config do |d|
        d.permission(:profile, :read, "Chubbi.es wants to view your profile so that it can show it to other users.")
@@ -115,6 +116,19 @@ describe DiasporaClient do
 
       conn = Faraday.default_connection
       conn.builder.handlers.should include(Faraday::Adapter::EMSynchrony)
+    end
+  end
+
+  describe "#scheme" do
+    it 'sets the https app url by default' do
+      DiasporaClient.scheme.should == 'https'
+    end
+
+    it 'sets the http app url in test mode' do
+      DiasporaClient.config do |d|
+        d.test_mode = true
+      end
+      DiasporaClient.scheme.should == 'http'
     end
   end
 
