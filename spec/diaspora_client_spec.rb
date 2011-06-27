@@ -118,9 +118,16 @@ describe DiasporaClient do
   end
 
   describe '.application_base_url' do
+    it 'works with localhost' do
+      DiasporaClient.config do |d|
+        d.application_base_url = "localhost:6924"
+      end
+      DiasporaClient.application_base_url.to_s.should == "https://localhost:6924/"
+    end
+
     it 'normalizes application_base_url' do
       DiasporaClient.config do |d|
-        d.application_base_url= "https://google.com/"
+        d.application_base_url= "google.com"
       end
 
       DiasporaClient.application_base_url.to_s.should == "https://google.com:443/"

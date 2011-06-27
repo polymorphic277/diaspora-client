@@ -130,9 +130,14 @@ module DiasporaClient
   #
   # @return [Addressable::URI] The url of the server using DiasporaClient.
   def self.application_base_url
+    if @application_base_url.match(/^localhost:\d+/)
+      @application_base_url = DiasporaClient.scheme + "://" + @application_base_url
+    end
+
     host = Addressable::URI.heuristic_parse(@application_base_url)
     host.scheme = self.scheme
     host.port ||= host.inferred_port
+    host.path = '/' if host.path.blank?
     host
   end
 
