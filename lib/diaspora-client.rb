@@ -39,7 +39,7 @@ module DiasporaClient
 
 
   self.setter :test_mode,
-              :application_url,
+              :application_base_url,
               :private_key_path,
               :public_key_path,
               :permissions
@@ -55,11 +55,12 @@ module DiasporaClient
   # @example
   #   DiasporaClient.config do |d|
   #     d.test_mode = true
-  #     d.application_url = "http://chubbi.es/"
+  #
+  #     #The base url of your application.  Your manifest must be at https://[application/base/url/]manifest.json.
+  #     d.application_base_url = "chubbi.es/"
   #
   #     d.manifest_field(:name, "Chubbies")
   #     d.manifest_field(:description, "The best way to chub.")
-  #     d.manifest_field(:homepage_url, "http://chubbi.es/")
   #     d.manifest_field(:icon_url, "#")
   #
   #     d.manifest_field(:permissions_overview, "Chubbi.es wants to post photos to your stream.")
@@ -74,6 +75,10 @@ module DiasporaClient
 
     if block_given?
       block.call(self)
+    end
+
+    if @test_mode
+      self.set_test_defaults
     end
   end
 
@@ -105,7 +110,7 @@ module DiasporaClient
   # @return [Symbol] The Faraday adapter.
   def self.which_faraday_adapter?
     if(defined?(EM::Synchrony) && EM.reactor_running?)
-      :em_synchrony  
+      :em_synchrony
     else
       :net_http
     end
@@ -117,15 +122,15 @@ module DiasporaClient
   def self.setup_faraday
     @faraday_initialized ||= Faraday.default_connection = Faraday::Connection.new do |builder|
       builder.use Faraday::Request::JSON
-      builder.adapter self.which_faraday_adapter? 
+      builder.adapter self.which_faraday_adapter?
     end
   end
 
-  # Parses host and port from @application_url.
-  # 
-  # @return [String] Host of application
-  def self.application_host
-    host = Addressable::URI.heuristic_parse(@application_url)
+  # Normalizes and adds a scheme and port to @application_base_url.
+  #
+  # @return [Addressable::URI] The url of the server using DiasporaClient.
+  def self.application_base_url
+    host = Addressable::URI.heuristic_parse(@application_base_url)
     host.scheme = self.scheme
     host.port ||= host.inferred_port
     host
@@ -148,7 +153,6 @@ module DiasporaClient
     @public_key = nil
 
     @test_mode = false
-    @application_url = 'example.com'
 
     @faraday_initialized = nil
   end
@@ -182,14 +186,25 @@ module DiasporaClient
                           :description => description}
   end
 
+  # Generates the manifest content used in {.package_manifest}.
+  # @return [Hash]
+  def self.generate_manifest
+    @manifest_fields.merge(:permissions => @permissions,
+                           :application_base_url => @application_base_url)
+  end
+
   # Generates a manifest of the form {:public_key => key, :jwt => jwt}
   #
   # @return [String] manifest The resulting manifest.json
   def self.package_manifest
-    manifest = @manifest_fields.merge(:permissions => @permissions)
-
     JSON.generate({:public_key => self.public_key,
-                   :jwt => JWT.encode(manifest, self.private_key, "RS512")})
+                   :jwt => JWT.encode(self.generate_manifest, self.private_key, "RS512")})
+  end
+
+  # Sets default config values for testing
+  # @return [void]
+  def self.set_test_defaults
+    @application_base_url ||= "example.com"
   end
 end
 

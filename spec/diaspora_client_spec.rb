@@ -63,7 +63,6 @@ describe DiasporaClient do
       DiasporaClient.config do |d|
         d.manifest_field(:name, "Chubbies")
         d.manifest_field(:description, "The best way to chub.")
-        d.manifest_field(:homepage_url, "http://localhost:9292/")
         d.manifest_field(:icon_url, "#")
 
         d.manifest_field(:permissions_overview, "Chubbi.es wants to post photos to your stream.")
@@ -71,7 +70,6 @@ describe DiasporaClient do
 
       DiasporaClient.manifest_fields[:name].should == "Chubbies"
       DiasporaClient.manifest_fields[:description].should == "The best way to chub."
-      DiasporaClient.manifest_fields[:homepage_url].should == "http://localhost:9292/"
       DiasporaClient.manifest_fields[:icon_url].should == "#"
       DiasporaClient.manifest_fields[:permissions_overview].should == "Chubbi.es wants to post photos to your stream."
     end
@@ -119,7 +117,17 @@ describe DiasporaClient do
     end
   end
 
-  describe "#scheme" do
+  describe '.application_base_url' do
+    it 'normalizes application_base_url' do
+      DiasporaClient.config do |d|
+        d.application_base_url= "https://google.com/"
+      end
+
+      DiasporaClient.application_base_url.to_s.should == "https://google.com:443/"
+    end
+  end
+
+  describe ".scheme" do
     it 'sets the https app url by default' do
       DiasporaClient.scheme.should == 'https'
     end
@@ -132,7 +140,7 @@ describe DiasporaClient do
     end
   end
 
-  describe ".generate_manifest" do
+  context "manifest" do
     before do
       pub_key_path = File.dirname(__FILE__) + "/chubbies.public.pem"
       private_key_path = File.dirname(__FILE__) + "/chubbies.private.pem"
@@ -140,10 +148,10 @@ describe DiasporaClient do
       DiasporaClient.config do |d|
         d.public_key_path = pub_key_path
         d.private_key_path = private_key_path
+        d.application_base_url = "http://localhost:4000/"
 
         d.manifest_field(:name, "Chubbies")
         d.manifest_field(:description, "The best way to chub.")
-        d.manifest_field(:homepage_url, "http://localhost:9292/")
         d.manifest_field(:icon_url, "#")
 
         d.manifest_field(:permissions_overview, "Chubbi.es wants to post photos to your stream.")
@@ -153,28 +161,37 @@ describe DiasporaClient do
       end
     end
 
-    it 'puts the public key in the manifest' do
-      JSON.parse(DiasporaClient.package_manifest)['public_key'].should_not be_blank
+    describe ".generate_manifest" do
+      it 'puts application_base_url into the manifest' do
+        DiasporaClient.generate_manifest[:application_base_url].should_not be_blank
+      end
     end
 
-    context "JWT" do
-      before do
-        @packaged_manifest_jwt = JSON.parse(DiasporaClient.package_manifest)['jwt']
-        @pub_key = OpenSSL::PKey::RSA.new(DiasporaClient.public_key)
+
+    describe ".package_manifest" do
+      it 'puts the public key in the manifest package' do
+        JSON.parse(DiasporaClient.package_manifest)['public_key'].should_not be_blank
       end
 
-      it 'is present' do
-        @packaged_manifest_jwt.should_not be_blank
-      end
+      context "JWT" do
+        before do
+          @packaged_manifest_jwt = JSON.parse(DiasporaClient.package_manifest)['jwt']
+          @pub_key = OpenSSL::PKey::RSA.new(DiasporaClient.public_key)
+        end
 
-      it 'has all manifest fields' do
-        JWT.decode(@packaged_manifest_jwt, @pub_key).symbolize_keys.should include(DiasporaClient.manifest_fields)
-      end
+        it 'is present' do
+          @packaged_manifest_jwt.should_not be_blank
+        end
 
-      it 'has all permission fields' do
-        jwt_permissions = JWT.decode(@packaged_manifest_jwt, @pub_key)["permissions"].symbolize_keys
-        jwt_permissions.keys.each do |key|
-          jwt_permissions[key].symbolize_keys.should == DiasporaClient.permissions[key]
+        it 'has all manifest fields' do
+          JWT.decode(@packaged_manifest_jwt, @pub_key).symbolize_keys.should include(DiasporaClient.manifest_fields)
+        end
+
+        it 'has all permission fields' do
+          jwt_permissions = JWT.decode(@packaged_manifest_jwt, @pub_key)["permissions"].symbolize_keys
+          jwt_permissions.keys.each do |key|
+            jwt_permissions[key].symbolize_keys.should == DiasporaClient.permissions[key]
+          end
         end
       end
     end

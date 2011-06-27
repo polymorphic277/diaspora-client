@@ -32,12 +32,13 @@ describe DiasporaClient::ResourceServer do
     it 'raises if the connection response is not acceptable' do
        conn = mock
        conn.stub_chain(:post, :success? => false)
+       conn.stub_chain(:post, :body => "Error message from the pod")
        Faraday.stub(:default_connection).and_return(conn)
 
 
       lambda{
         ResourceServer.register(@host)
-      }.should raise_error /Failed to connect to Diaspora server./
+      }.should raise_error RegistrationError
     end
   end
 
@@ -109,7 +110,7 @@ describe DiasporaClient::ResourceServer do
     it 'returns a signable string' do
       pod = ResourceServer.new(:host => @host)
       ActiveSupport::SecureRandom.stub!(:base64).and_return("nonce")
-      signable_string = ["https://example.com:443", "https://#{@host}:443", @time.to_i, "nonce"].join(';')
+      signable_string = [DiasporaClient.application_base_url, "https://#{@host}:443", @time.to_i, "nonce"].join(';')
       pod.signable_string.should == signable_string
     end
   end
