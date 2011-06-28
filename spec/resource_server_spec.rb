@@ -92,17 +92,8 @@ describe DiasporaClient::ResourceServer do
 
     it 'returns base64 encoded signature' do
       str = "SIG"
-      @resource.stub(:signature).and_return(str)
+      DiasporaClient.stub(:sign).and_return(str)
       @resource.build_register_body[:signature].should == Base64.encode64(str)
-    end
-  end
-
-  describe '#signature' do
-    it 'signs the plaintext' do
-      plaintext = "cats"
-      DiasporaClient.private_key.should_receive(:sign).with( OpenSSL::Digest::SHA256.new, plaintext).and_return("sig")
-
-      ResourceServer.new(:host => @host).signature(plaintext).should == "sig"
     end
   end
 

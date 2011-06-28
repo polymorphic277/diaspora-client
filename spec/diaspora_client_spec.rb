@@ -40,6 +40,14 @@ describe DiasporaClient do
       DiasporaClient.private_key
       DiasporaClient.private_key
     end
+
+    describe '.sign' do
+      it 'signs plaintext' do
+        plaintext = "cats"
+        DiasporaClient.private_key.should_receive(:sign).with( OpenSSL::Digest::SHA256.new, plaintext)
+        DiasporaClient.sign(plaintext)
+      end
+    end
   end
 
   describe ".config" do

@@ -24,4 +24,5 @@ group :development do
   gem "sqlite3"
   gem 'rack-test'
   gem 'ruby-debug19', :platform => :mri_19
+  gem 'yard'
 end

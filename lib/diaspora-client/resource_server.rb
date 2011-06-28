@@ -6,6 +6,10 @@ module DiasporaClient
   class ResourceServer < ActiveRecord::Base
     attr_accessible :host, :client_id, :client_secret
 
+    # Register this application at the pod located at host
+    # @param [String] host The location of a Diaspora server.
+    # @raise [RegistrationError] If the Diaspora server returns a non-20x response code.
+    # @return [ResourceServer] The new model of the server located at host.
     def self.register(host)
       pod = self.find_or_initialize_by_host(host)
       response = Faraday.post(pod.token_endpoint, pod.build_register_body)
@@ -35,14 +39,12 @@ module DiasporaClient
       {
         :type => :client_associate,
         :signed_string => Base64.encode64(signable_str),
-        :signature => Base64.encode64(signature(signable_str))
+        :signature => Base64.encode64(DiasporaClient.sign(signable_str))
       }
     end
 
-    def signature(plaintext)
-      DiasporaClient.private_key.sign(OpenSSL::Digest::SHA256.new, plaintext)
-    end
-
+    # @return [String] a semicolon separated string of the fields that need to be signed for
+    #                  the registration request.
     def signable_string
       [ DiasporaClient.application_base_url,
         full_host,
@@ -53,24 +55,21 @@ module DiasporaClient
 
     #TODO(*) these methods should be private -----------------------------------
 
-    # @note Indicative of interal server.
-    # @return [Addressable::URI] Host with protocol and optional port.
+    # @return [Addressable::URI] The URI of the Diaspora pod represented by this record.
     def full_host
       a = Addressable::URI.heuristic_parse(DiasporaClient.scheme + "://" + self.host)
       a.port ||= a.inferred_port
       a
     end
 
-    # @note Indicative of external server.
-    # @return [String] Host with token endpoint (external server).
+    # @return [String] The registration endpoint of this Diaspora pod.
     def token_endpoint
       url = self.full_host
       url.path = '/oauth/token'
       url.to_s
     end
 
-    # @note Indicative of external server.
-    # @return [String] Root API route to make calls from.
+    # @return [String] Root API route of this Diaspora pod.
     def api_route
       url = self.full_host
       url.path = '/api/v0'

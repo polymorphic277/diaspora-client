@@ -104,6 +104,11 @@ module DiasporaClient
     @private_key ||= OpenSSL::PKey::RSA.new(File.read(@private_key_path))
   end
 
+  # @return [String] A SHA256 signature of the passed in plaintext with the {.private_key}
+  def self.sign(plaintext)
+    self.private_key.sign(OpenSSL::Digest::SHA256.new, plaintext)
+  end
+
   # Returns either :em_synchrony or :net_http for Faraday according to
   # if the application is running in an EventMachine reactor loop.
   #
