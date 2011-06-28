@@ -195,7 +195,7 @@ module DiasporaClient
   # @return [Hash]
   def self.generate_manifest
     @manifest_fields.merge(:permissions => @permissions,
-                           :application_base_url => @application_base_url)
+                           :application_base_url => self.application_base_url.to_s)
   end
 
   # Generates a manifest of the form {:public_key => key, :jwt => jwt}
