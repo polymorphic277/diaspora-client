@@ -20,6 +20,7 @@ rake generate_keys
 
 == Copyright
 
-Copyright (c) 2011 Raphael Sofaer. See LICENSE.txt for
-further details.
+MIT License. Copyright (c) 2011 Diaspora Inc. http://blog.joindiaspora.com
+See MIT-LICENSE.txt for further details.
+
 
