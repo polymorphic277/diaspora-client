@@ -1,3 +1,4 @@
-script: "bundle exec rake spec"
+bundler_args: "--without development"
+script: "bundle exec rspec spec"
 rvm:
   - 1.9.2
