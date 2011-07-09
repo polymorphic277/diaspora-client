@@ -16,4 +16,8 @@ describe DiasporaClient::App do
     last_response.headers['Location'].include?("diaspora-client-error").should be_true
   end
 
+  it 'handles a diaspora id with spaces at the end' do
+    DiasporaClient::ResourceServer.should_receive(:where).with(:host => 'thepod.com')
+    get '/', 'diaspora_handle' => 'icopypasted@thepod.com '
+  end
 end

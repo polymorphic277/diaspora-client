@@ -1,6 +1,6 @@
 module DiasporaClient
   class App < Sinatra::Base
-    
+
     # @return [OAuth2::Client] The connecting Diaspora installation's Client object.
     # @see #pod
     def client
@@ -22,7 +22,7 @@ module DiasporaClient
     #
     # @return [String]
     def diaspora_handle
-      params['diaspora_handle']
+      @diaspora_handle ||= params['diaspora_handle'].strip!
     end
 
     # @return [String] The path to hit after retreiving an access token from a Diaspora server.
@@ -53,7 +53,7 @@ module DiasporaClient
     get '/' do
 
       # ensure faraday is configured
-      DiasporaClient.setup_faraday 
+      DiasporaClient.setup_faraday
 
       begin
         redirect client.web_server.authorize_url(
