@@ -20,4 +20,9 @@ describe DiasporaClient::App do
     DiasporaClient::ResourceServer.should_receive(:where).with(:host => 'thepod.com')
     get '/', 'diaspora_handle' => 'icopypasted@thepod.com '
   end
+
+  it 'handles a diaspora id with no spaces' do
+    DiasporaClient::ResourceServer.should_receive(:where).with(:host => 'thepod.com')
+    get '/', 'diaspora_handle' => 'icopypasted@thepod.com'
+  end
 end

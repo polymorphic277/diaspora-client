@@ -22,7 +22,7 @@ module DiasporaClient
     #
     # @return [String]
     def diaspora_handle
-      @diaspora_handle ||= params['diaspora_handle'].strip!
+      @diaspora_handle ||= params['diaspora_handle'].strip
     end
 
     # @return [String] The path to hit after retreiving an access token from a Diaspora server.
