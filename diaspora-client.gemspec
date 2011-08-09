@@ -24,8 +24,6 @@ Gem::Specification.new do |s|
     "Rakefile",
     "VERSION",
     "lib/diaspora-client.rb",
-    "test/helper.rb",
-    "test/test_diaspora-client.rb"
   ]
   s.homepage = %q{http://github.com/diaspora/diaspora-client}
   s.licenses = ["MIT"]
