@@ -14,7 +14,7 @@ module DiasporaClient
       pod = self.find_or_initialize_by_host(host)
       response = Faraday.post(pod.token_endpoint, pod.build_register_body)
 
-      unless response.success?
+      unless(response.present? && response.success?)
         message = "Failed to connect to Diaspora server: "
         message += response.body if response.body
         raise RegistrationError.new(message)
