@@ -10,7 +10,7 @@ Gem::Specification.new do |s|
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Raphael Sofaer"]
   s.date = %q{2011-06-09}
-  s.description = %q{TODO: longer description of your gem}
+  s.description = %q{a gem to help with authentication and communicating with a Diaspora server}
   s.email = %q{raphael@joindiaspora.com}
   s.extra_rdoc_files = [
     "LICENSE.txt",
