@@ -1,3 +1,5 @@
+require 'addressable/uri'
+
 module DiasporaClient
   class App < Sinatra::Base
 
@@ -76,16 +78,30 @@ module DiasporaClient
     # @return [void]
     get '/callback' do
       if !params["error"]
-        access_token = client.web_server.get_access_token(params[:code], :redirect_uri => redirect_uri)
-        user = JSON.parse(access_token.get('/api/v0/me'))
+        if params['code']
+          access_token = client.web_server.get_access_token(params[:code], :redirect_uri => redirect_uri)
 
-        current_user.create_access_token(
-          :uid => user["uid"],
-          :resource_server_id => pod.id,
-          :access_token => access_token.token,
-          :refresh_token => access_token.refresh_token,
-          :expires_at => access_token.expires_at
-        )
+          user_json = JSON.parse(access_token.get('/api/v0/me'))
+
+          url = Addressable::URI.parse(client.web_server.authorize_url).normalized_host
+          if port = Addressable::URI.parse(client.web_server.authorize_url).normalized_port
+            url += ":#{port}"
+          end
+
+          user = current_user || create_account(:username => user_json['uid'] + Addressable::URI.parse(client.web_server.authorize_url).normalized_host)
+          user.create_access_token(
+            :uid => user_json["uid"],
+            :resource_server_id => pod.id,
+            :access_token => access_token.token,
+            :refresh_token => access_token.refresh_token,
+            :expires_at => access_token.expires_at
+          )
+
+        elsif params['access_token'] && params['refresh_token']
+          access_token = AccessToken.where(:access_token => params[:access_token],
+                                           :refresh_token => params[:refresh_token]).first
+        end
+          
       elsif params["error"] == "invalid_client"
         ResourceServer.register(diaspora_handle.split('@')[1])
         redirect "/?diaspora_handle=#{diaspora_handle}"
