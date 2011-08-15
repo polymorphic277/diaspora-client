@@ -37,10 +37,17 @@ module DiasporaClient
       '/users/edit'
     end
 
+    # Used in the default implementation of create_account.
+    # Defaults to User
+    # @return [ActiveRecord::Base, .create!]
+    def account_const
+      ::User
+    end
     # @option hash [String] :diaspora_id The connecting user's diaspora id
-    # @abstract
-    # @return [User]
-    def create_account(hash); end
+    # @return [User] A created and persisted user account which an access token can be attached to
+    def create_account(hash)
+      account_const.create!(hash)
+    end
 
     # @return [String] The URL to hit after retreiving an access token from a Diaspora server.
     # @see #redirect_path

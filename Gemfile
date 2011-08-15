@@ -10,7 +10,7 @@ gem 'sinatra'
 gem 'activerecord'
 gem 'oauth2', '0.4.1'
 gem 'faraday'
-gem 'jwt', :git => "https://github.com/zhitomirskiyi/ruby-jwt"
+gem 'jwt', '>= 0.1.3'
 gem 'em-synchrony', :platform => :mri_19 
 gem 'em-http-request', :platform => :mri_19
 gem 'rack-fiber_pool', :require => 'rack/fiber_pool', :platform => :mri_19
