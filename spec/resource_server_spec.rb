@@ -36,13 +36,9 @@ describe DiasporaClient::ResourceServer do
       Faraday.stub(:default_connection).and_return(conn)
 
 
-      begin
+      proc {
         ResourceServer.register(@host)
-        false.should == true #The above line should raise an error
-      rescue Exception => e
-        raise e unless e.class == DiasporaClient::RegistrationError
-        e.class.should == DiasporaClient::RegistrationError
-      end
+      }.should raise_error DiasporaClient::RegistrationError
     end
   end
 

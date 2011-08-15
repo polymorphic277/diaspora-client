@@ -46,6 +46,8 @@ end
 
 RSpec.configure do |c|
   c.before(:each) do
-    DiasporaClient.initialize_instance_variables
+    DiasporaClient.config do |c|
+      c.application_base_url = "localhost:1234"
+    end
   end
 end
