@@ -36,9 +36,9 @@ describe DiasporaClient::ResourceServer do
        Faraday.stub(:default_connection).and_return(conn)
 
 
-      #lambda{
+      lambda{
         ResourceServer.register(@host)
-      #}.should raise_error RegistrationError
+      }.should raise_error RegistrationError
     end
   end
 

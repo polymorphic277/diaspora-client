@@ -57,59 +57,54 @@ module DiasporaClient
       # ensure faraday is configured
       DiasporaClient.setup_faraday
 
-#      begin
+       begin
         redirect client.web_server.authorize_url(
           :redirect_uri => redirect_uri,
           :scope => 'profile,AS_photo:post'
         )
-#      rescue Exception => e
-#        puts "failing"
-#        redirect_url = back.to_s
-#        if defined?(Rails)
-#          flash_class = ActionDispatch::Flash
-#          flash = request.env["action_dispatch.request.flash_hash"] ||= flash_class::FlashHash.new
-#          flash.alert = e.message
-#        else
-#          redirect_url << "?diaspora-client-error=#{URI.escape(e.message)}"
-#        end
-#        redirect redirect_url
-#      end
+       rescue Exception => e
+         redirect_url = back.to_s
+         if defined?(Rails)
+           flash_class = ActionDispatch::Flash
+           flash = request.env["action_dispatch.request.flash_hash"] ||= flash_class::FlashHash.new
+           flash.alert = e.message
+         else
+           redirect_url << "?diaspora-client-error=#{URI.escape(e.message)}"
+         end
+         redirect redirect_url
+       end
     end
 
     # @return [void]
     get '/callback' do
       if !params["error"]
-        if params['code']
-          access_token = client.web_server.get_access_token(params[:code], :redirect_uri => redirect_uri)
 
-          user_json = JSON.parse(access_token.get('/api/v0/me'))
+        access_token = client.web_server.get_access_token(params[:code], :redirect_uri => redirect_uri)
 
-          url = Addressable::URI.parse(client.web_server.authorize_url).normalized_host
-          if port = Addressable::URI.parse(client.web_server.authorize_url).normalized_port
-            url += ":#{port}"
-          end
+        user_json = JSON.parse(access_token.get('/api/v0/me'))
 
-          user = current_user 
-          user ||= create_account(:username => user_json['uid'] + "@" + Addressable::URI.parse(client.web_server.authorize_url).normalized_host)
-
-          if at = user.access_token
-            at.destroy
-          end
-
-          puts access_token.inspect
-          hash = {}
-           hash[:uid] = user_json["uid"]
-           hash[:resource_server_id] = pod.id
-           hash[:access_token] = access_token.token
-           hash[:refresh_token] = access_token.refresh_token
-           hash[:expires_at] = access_token.expires_at
-          user.create_access_token( hash )
-
-        elsif params['access_token'] && params['refresh_token']
-          access_token = AccessToken.where(:access_token => params[:access_token],
-                                           :refresh_token => params[:refresh_token]).first
+        url = Addressable::URI.parse(client.web_server.authorize_url).normalized_host
+        if port = Addressable::URI.parse(client.web_server.authorize_url).normalized_port
+          url += ":#{port}"
         end
-          
+
+        user = current_user
+        user ||= create_account(:username => user_json['uid'] + "@" + Addressable::URI.parse(client.web_server.authorize_url).normalized_host)
+
+        if at = user.access_token
+          at.destroy
+        end
+
+        user.access_token = nil
+        user.create_access_token(
+          :uid => user_json["uid"],
+          :resource_server_id => pod.id,
+          :access_token => access_token.token,
+          :refresh_token => access_token.refresh_token,
+          :expires_at => access_token.expires_at
+        )
+
+
       elsif params["error"] == "invalid_client"
         ResourceServer.register(diaspora_handle.split('@')[1])
         redirect "/?diaspora_handle=#{diaspora_handle}"
