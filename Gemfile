@@ -24,7 +24,6 @@ group :development do
 end
 
 group :test, :development do
-  gem "shoulda", ">= 0"
   gem 'rspec', '>= 2.0.0'
   gem "sqlite3"
   gem 'rack-test'

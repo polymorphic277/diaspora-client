@@ -37,6 +37,11 @@ module DiasporaClient
       '/users/edit'
     end
 
+    # @option hash [String] :diaspora_id The connecting user's diaspora id
+    # @abstract
+    # @return [User]
+    def create_account(hash); end
+
     # @return [String] The URL to hit after retreiving an access token from a Diaspora server.
     # @see #redirect_path
     def redirect_uri
@@ -89,13 +94,13 @@ module DiasporaClient
         end
 
         user = current_user
-        user ||= create_account(:username => user_json['uid'] + "@" + Addressable::URI.parse(client.web_server.authorize_url).normalized_host)
+        user ||= create_account(:diaspora_id => user_json['uid'] + "@" + Addressable::URI.parse(client.web_server.authorize_url).normalized_host)
 
         if at = user.access_token
           at.destroy
+          user.access_token = nil
         end
 
-        user.access_token = nil
         user.create_access_token(
           :uid => user_json["uid"],
           :resource_server_id => pod.id,
