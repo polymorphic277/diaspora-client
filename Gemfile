@@ -8,7 +8,7 @@ source "http://rubygems.org"
 
 gem 'sinatra'
 gem 'activerecord'
-gem 'oauth2'
+gem 'oauth2', '0.4.1'
 gem 'faraday'
 gem 'jwt', :git => "https://github.com/zhitomirskiyi/ruby-jwt"
 gem 'em-synchrony', :platform => :mri_19 
