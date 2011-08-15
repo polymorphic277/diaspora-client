@@ -30,15 +30,19 @@ describe DiasporaClient::ResourceServer do
     end
 
     it 'raises if the connection response is not acceptable' do
-       conn = mock
-       conn.stub_chain(:post, :success? => false)
-       conn.stub_chain(:post, :body => "Error message from the pod")
-       Faraday.stub(:default_connection).and_return(conn)
+      conn = mock
+      conn.stub_chain(:post, :success? => false)
+      conn.stub_chain(:post, :body => "Error message from the pod")
+      Faraday.stub(:default_connection).and_return(conn)
 
 
-      lambda{
+      begin
         ResourceServer.register(@host)
-      }.should raise_error RegistrationError
+        false.should == true #The above line should raise an error
+      rescue Exception => e
+        raise e unless e.class == DiasporaClient::RegistrationError
+        e.class.should == DiasporaClient::RegistrationError
+      end
     end
   end
 
