@@ -15,16 +15,20 @@ module DiasporaClient
     # @return [ResourceServer]
     def pod
       @pod ||= lambda{
-        host = diaspora_handle.split('@')[1]
+        host = diaspora_id.split('@')[1]
         ResourceServer.where(:host => host).first || ResourceServer.register(host)
       }.call
     end
 
-    # Retreive the user's Diaspora handle from the params hash.
+    # Retreive the user's Diaspora id from the params hash.
     #
     # @return [String]
-    def diaspora_handle
-      @diaspora_handle ||= params['diaspora_handle'].strip
+    def diaspora_id
+      @diaspora_id ||= params['diaspora_id'].strip
+    end
+
+    def uid
+      @uid ||= diaspora_id.split('@')[0]
     end
 
     # @return [String] The path to hit after retreiving an access token from a Diaspora server.
@@ -54,7 +58,7 @@ module DiasporaClient
     def redirect_uri
       uri = Addressable::URI.parse(request.url)
       uri.path = redirect_path
-      uri.query_values = {:diaspora_handle => diaspora_handle}
+      uri.query_values = {:diaspora_id => diaspora_id}
       uri.to_s
     end
 
@@ -69,22 +73,23 @@ module DiasporaClient
       # ensure faraday is configured
       DiasporaClient.setup_faraday
 
-       begin
+      begin
         redirect client.web_server.authorize_url(
           :redirect_uri => redirect_uri,
-          :scope => 'profile,AS_photo:post'
+          :scope => 'profile,AS_photo:post',
+          :uid => uid
         )
-       rescue Exception => e
-         redirect_url = back.to_s
-         if defined?(Rails)
-           flash_class = ActionDispatch::Flash
-           flash = request.env["action_dispatch.request.flash_hash"] ||= flash_class::FlashHash.new
-           flash.alert = e.message
-         else
-           redirect_url << "?diaspora-client-error=#{URI.escape(e.message)}"
-         end
-         redirect redirect_url
-       end
+      rescue Exception => e
+        redirect_url = back.to_s
+        if defined?(Rails)
+          flash_class = ActionDispatch::Flash
+          flash = request.env["action_dispatch.request.flash_hash"] ||= flash_class::FlashHash.new
+          flash.alert = e.message
+        else
+          redirect_url << "?diaspora-client-error=#{URI.escape(e.message)}"
+        end
+        redirect redirect_url
+      end
     end
 
     # @return [void]
@@ -118,8 +123,8 @@ module DiasporaClient
 
 
       elsif params["error"] == "invalid_client"
-        ResourceServer.register(diaspora_handle.split('@')[1])
-        redirect "/?diaspora_handle=#{diaspora_handle}"
+        ResourceServer.register(diaspora_id.split('@')[1])
+        redirect "/?diaspora_id=#{diaspora_id}"
       end
 
       redirect after_oauth_redirect_path

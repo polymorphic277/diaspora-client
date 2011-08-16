@@ -18,11 +18,11 @@ describe DiasporaClient::App do
 
   it 'handles a diaspora id with spaces at the end' do
     DiasporaClient::ResourceServer.should_receive(:where).with(:host => 'thepod.com')
-    get '/', 'diaspora_handle' => 'icopypasted@thepod.com '
+    get '/', 'diaspora_id' => 'icopypasted@thepod.com '
   end
 
   it 'handles a diaspora id with no spaces' do
     DiasporaClient::ResourceServer.should_receive(:where).with(:host => 'thepod.com')
-    get '/', 'diaspora_handle' => 'icopypasted@thepod.com'
+    get '/', 'diaspora_id' => 'icopypasted@thepod.com'
   end
 end
