@@ -37,17 +37,26 @@ module DiasporaClient
     end
   end
 
+  # Creates a getter and setter for every passed in field
+  # @see [DiasporaClient#getter]
+  # @see [DiasporaClient#setter]
+  # @return [void]
+  def self.get_and_set(*fields)
+    self.getter *fields
+    self.setter *fields
+  end
+
+
+  self.get_and_set :private_key_path,
+                   :public_key_path,
+                   :permissions,
+                   :account_class,
+                   :account_creation_method
 
   self.setter :test_mode,
-              :application_base_url,
-              :private_key_path,
-              :public_key_path,
-              :permissions
+              :application_base_url
 
-  self.getter :manifest_fields,
-              :private_key_path,
-              :public_key_path,
-              :permissions
+  self.getter :manifest_fields
 
 
   # Calls {.initialize_instance_variables} and yields to a given (optional) config block.
@@ -165,6 +174,9 @@ module DiasporaClient
     @test_mode = false
 
     @faraday_initialized = nil
+
+    @account_class = nil
+    @account_creation_method = :create_with_diaspora
   end
 
   # Defines a field to be placed in the application's manifest.

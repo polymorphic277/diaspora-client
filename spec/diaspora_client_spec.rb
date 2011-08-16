@@ -99,6 +99,19 @@ describe DiasporaClient do
       pr[:type].should == DiasporaClient::PHOTOS
       pr[:description].should == "Chubbi.es wants to write to your photos to share your findings with your contacts."
     end
+
+    it 'sets account_class and account_creation_method' do
+      DiasporaClient.account_class.should == nil
+      DiasporaClient.account_creation_method.should == :create_with_diaspora
+
+      DiasporaClient.config do |d|
+        d.account_class = URI
+        d.account_creation_method = :parse
+      end
+
+      DiasporaClient.account_class.should == URI
+      DiasporaClient.account_creation_method.should == :parse
+    end
   end
 
   describe 'setup_faraday' do
