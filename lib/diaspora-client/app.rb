@@ -86,7 +86,7 @@ module DiasporaClient
           flash = request.env["action_dispatch.request.flash_hash"] ||= flash_class::FlashHash.new
           flash.alert = e.message
         else
-          redirect_url << "?diaspora-client-error=#{URI.escape(e.message)}"
+          redirect_url << "?diaspora-client-error=#{URI.escape(e.message[0..800])}"
         end
         redirect redirect_url
       end
