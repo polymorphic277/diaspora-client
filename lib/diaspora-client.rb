@@ -176,7 +176,7 @@ module DiasporaClient
     @faraday_initialized = nil
 
     @account_class = nil
-    @account_creation_method = :create_with_diaspora
+    @account_creation_method = :find_or_create_with_diaspora
   end
 
   # Defines a field to be placed in the application's manifest.

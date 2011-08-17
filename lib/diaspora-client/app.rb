@@ -38,7 +38,7 @@ module DiasporaClient
 
     # @return [String] The path to send the user after the OAuth2 dance is complete.
     def after_oauth_redirect_path
-      '/users/edit'
+      '/'
     end
 
     # @option hash [String] :diaspora_id The connecting user's diaspora id
@@ -59,6 +59,10 @@ module DiasporaClient
     # @return [User] The current user stored in warden.
     def current_user
       request.env["warden"].user
+    end
+
+    def current_user=(user)
+      request.env["warden"].set_user(user, :scope => :user, :store => true)
     end
 
     # @return [void]
@@ -99,22 +103,20 @@ module DiasporaClient
           url += ":#{port}"
         end
 
-        user = current_user
-        user ||= create_account(:diaspora_id => user_json['uid'] + "@" + Addressable::URI.parse(client.web_server.authorize_url).normalized_host)
+        self.current_user ||= create_account(:diaspora_id => user_json['uid'] + "@" + url)
 
-        if at = user.access_token
+        if at = current_user.access_token
           at.destroy
-          user.access_token = nil
+          current_user.access_token = nil
         end
 
-        user.create_access_token(
+        current_user.create_access_token(
           :uid => user_json["uid"],
           :resource_server_id => pod.id,
           :access_token => access_token.token,
           :refresh_token => access_token.refresh_token,
           :expires_at => access_token.expires_at
         )
-
 
       elsif params["error"] == "invalid_client"
         ResourceServer.register(diaspora_id.split('@')[1])

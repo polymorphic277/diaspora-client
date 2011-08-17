@@ -102,7 +102,7 @@ describe DiasporaClient do
 
     it 'sets account_class and account_creation_method' do
       DiasporaClient.account_class.should == nil
-      DiasporaClient.account_creation_method.should == :create_with_diaspora
+      DiasporaClient.account_creation_method.should == :find_or_create_with_diaspora
 
       DiasporaClient.config do |d|
         d.account_class = URI
