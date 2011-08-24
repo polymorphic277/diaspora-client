@@ -5,13 +5,13 @@
 
 Gem::Specification.new do |s|
   s.name = %q{diaspora-client}
-  s.version = "0.0.0"
+  s.version = "0.1.0"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
-  s.authors = ["Raphael Sofaer"]
+  s.authors = ["Diaspora, Inc."]
   s.date = %q{2011-06-09}
   s.description = %q{a gem to help with authentication and communicating with a Diaspora server}
-  s.email = %q{raphael@joindiaspora.com}
+  s.email = %q{ilya@joindiaspora.com}
   s.extra_rdoc_files = [
     "LICENSE.txt",
     "README.rdoc"
