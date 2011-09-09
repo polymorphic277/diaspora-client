@@ -2,10 +2,20 @@
 
 Diaspora Client is a gem that strives to make intergration into the Diaspora ecosystem a breeze.
 
-To generate a keypair run:
+There are two steps to getting this gem setup in your application:
 
-rake generate_keys
+1) To generate a keypair run:
 
+rake diaspora:generate_keys
+
+2) Package Your manifest file (setup in: config/initializers/diaspora_client.rb):
+
+rake diaspora:package_manifest
+
+
+For an Example check out:
+
+https://github.com/diaspora/Diaspora-Client-Sample
 
 
 == Contributing to diaspora-client
