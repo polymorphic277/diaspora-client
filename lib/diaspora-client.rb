@@ -98,7 +98,7 @@ module DiasporaClient
 
 Please do the following:
 1. Double check your configuration (ex. config/diaspora_client.rb).
-2. Run this command:
+2. Overwrite your manifest file to match. Run this command:
 
   rake diaspora:package_manifest
 
