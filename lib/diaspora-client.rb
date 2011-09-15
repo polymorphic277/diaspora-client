@@ -89,6 +89,27 @@ module DiasporaClient
     if @test_mode
       self.set_test_defaults
     end
+    
+    if defined?(Rails) && Rails.env == "production" && !@test_mode
+      unless self.verify_manifest
+        $stderr.puts <<-HELP
+******** Your Diaspora* Client is not setup in test mode and ***********
+******** Your manifest.json does not match your configuration **********
+
+Please do the following:
+1. Double check your configuration (ex. config/diaspora_client.rb).
+2. Run this command:
+
+  rake diaspora:package_manifest
+
+3. Restart your application!
+******** Have a great day! **********
+HELP
+        Process.exit(1)
+      end
+    end
+    
+
   end
 
   # Application's current protocol (http/https).
@@ -214,7 +235,13 @@ module DiasporaClient
     @manifest_fields.merge(:permissions => @permissions,
                            :application_base_url => self.application_base_url.to_s)
   end
-
+  
+  # Verifies that the manifest located in the public directory is valid
+  # @return [Boolean]
+  def self.verify_manifest
+    JSON.parse(self.package_manifest) == JSON.parse(self.read_manifest)
+  end
+  
   # Generates a manifest of the form {:public_key => key, :jwt => jwt}
   #
   # @return [String] manifest The resulting manifest.json
@@ -223,10 +250,30 @@ module DiasporaClient
                    :jwt => JWT.encode(self.generate_manifest, self.private_key, "RS512")})
   end
 
+  # Writes the manifest file to the public directory of the Rails project
+  #
+  def self.write_manifest
+    puts "writing manifest to: " + self.manifest_path
+    man_f = File.new(self.manifest_path, "w")
+    man_f.write(DiasporaClient.package_manifest)
+    man_f.close
+  end
+
   # Sets default config values for testing
   # @return [void]
   def self.set_test_defaults
     @application_base_url ||= "example.com"
   end
+
+  private
+
+  def self.manifest_path
+    @manifest_path ||=  File.join(Rails.root, "public", "manifest.json")
+  end
+
+  def self.read_manifest
+    @read_manifest ||= File.read(File.join(Rails.root, "public", "manifest.json"))
+  end
+
 end
 

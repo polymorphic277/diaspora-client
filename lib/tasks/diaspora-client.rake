@@ -20,12 +20,7 @@ namespace :diaspora do
 
   desc 'Packages a JWT-signed manifest from client configuration'
   task :package_manifest => :environment do
-    manifest_path = File.join(Rails.root, "public", "manifest.json")
-
-    puts "writing manifest to: " + manifest_path
-    man_f = File.new(manifest_path, "w")
-    man_f.write(DiasporaClient.package_manifest)
-    man_f.close
+    DiasporaClient.write_manifest
   end
 
 end

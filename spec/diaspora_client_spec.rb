@@ -112,7 +112,68 @@ describe DiasporaClient do
       DiasporaClient.account_class.should == URI
       DiasporaClient.account_creation_method.should == :parse
     end
+
+    context "manifest checking" do
+      before do
+        DiasporaClient.stub(:initialize_instance_variables)
+        DiasporaClient.stub(:write_manifest)
+        @rails_mock = mock
+        @rails_mock.stub(:env).and_return("production")
+      end
+
+      after do
+        begin
+          Object.send(:remove_const, :Rails)
+        rescue NameError
+        end
+      end
+
+      it 'does not check validity if Rails is udefined' do
+        DiasporaClient.should_not_receive(:verify_manifest)
+        DiasporaClient.config
+      end
+      
+      it 'checks the validity if Rails is defined' do
+        ::Rails = @rails_mock
+
+        DiasporaClient.should_receive(:verify_manifest).and_return(true)
+        DiasporaClient.config
+      end
+
+      it 'does not check validity if test mode' do
+        ::Rails = @rails_mock
+
+        DiasporaClient.should_not_receive(:verify_manifest)
+        DiasporaClient.instance_variable_set(:@test_mode, true)
+        DiasporaClient.config
+      end
+      
+      context 'does not verify' do
+        before do
+          @original_stderr = $stderr
+          $stderr = StringIO.new
+        end
+        after do
+          $stderr = @original_stderr
+        end
+
+        it "exits the manifest if it's not the same" do
+          ::Rails = @rails_mock
+
+          DiasporaClient.stub(:verify_manifest).and_return(false)
+
+          expect {
+            DiasporaClient.config
+          }.should raise_error SystemExit
+
+          $stderr.rewind
+          $stderr.string.chomp.should_not be_blank
+        end
+
+      end
+    end
   end
+
 
   describe 'setup_faraday' do
     it 'uses net:http if not in a reactor and 1.9.2' do
@@ -195,6 +256,17 @@ describe DiasporaClient do
       end
     end
 
+    describe ".verify_manifest" do
+      it "returns true if the json in the file is the same" do
+        DiasporaClient.stub(:read_manifest).and_return(DiasporaClient.package_manifest)
+        DiasporaClient.verify_manifest.should be_true
+      end
+
+      it "returns false if the manifest is different" do
+        DiasporaClient.stub(:read_manifest).and_return(JSON.generate({:a => "b"}))
+        DiasporaClient.verify_manifest.should be_false
+      end
+    end
 
     describe ".package_manifest" do
       it 'puts the public key in the manifest package' do
